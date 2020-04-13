@@ -11,5 +11,12 @@
  + 调用Selector的静态工厂创建一个选择器，创建一个服务端的Channel，绑定到一个Socket对象，并把这个通信信道注册到选择器上，把这个通信信道设置为非阻塞模式。然后就可以调用Selector的selectedKeys方法来检查已经注册在这个选择器上的所有通信信道是否有需要的事件发生，如果有某个事件发生，将会返回所有的selectedKeys，通过这个对象的Channel方法就可以取得这个通信信道对象，从而读取通信的数据，而这里读取的数据是Buffer，这个Buffer是我们可以控制的缓冲器。
 ### NIO组成
  + channle
+channle(通道) Channle和IO中的Stream是差不多一个等级的。 不过Stream是单向的。例如：inputStream、outputStream。而channle是双向的，即可用来写，也可用来写。
+ nio中常用的channle的实现:
+   1. FileChannle 文件IO
+   2. datagromChannle UDP
+   3. SocketChannle TCP client
+   4. ServerSocketChannle   TCP server
  + buffer
+  buffer(容器)
  + selector
