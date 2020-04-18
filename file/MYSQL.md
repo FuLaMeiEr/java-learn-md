@@ -7,8 +7,6 @@ hwc1.kluster.xyz
 hwc2.kluster.xyz
 hwc3.kluster.xyz
 
-用户名root密码1357924680
-
 
 
 ### MysqlSlap测试
