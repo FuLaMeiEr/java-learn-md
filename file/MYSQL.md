@@ -22,11 +22,12 @@ hwc3.kluster.xyz
 ### jmeter测试
 
 
-hwc3.kluster.xyz
-- 查询
-![1线程测试结果](https://github.com/FuLaMeiEr/java-learn-md/blob/master/image/1111.png)
-![5线程测试结果](https://github.com/FuLaMeiEr/java-learn-md/blob/master/image/555.png)
-
+hwc1 - hwc3 
+ |线程数 | 异常率|
+ |-|-|
+ |150|0%|
+ |200|24%-25%|
+ |300|50%|
 
 
 ## mysql相关知识
