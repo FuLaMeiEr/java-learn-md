@@ -8,6 +8,7 @@
 
 3. [测试日志]https://github.com/FuLaMeiEr/java-learn-md/blob/master/report/xls/mysysbench.log
 - 事务模式
+
 |并发数|数据总数|qps|tps|总响应时间|前5%最大响应时间|
 |-|-|-|-|-|-|-|
 |10|100w |18020 |901 | 1206452ms| 1708.63ms|
