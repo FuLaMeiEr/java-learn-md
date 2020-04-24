@@ -21,6 +21,11 @@ tps 1985
 前95%的最大响应时间 1803.63ms
 
 
+
+[测试日志]https://github.com/FuLaMeiEr/java-learn-md/blob/master/report/xls/mysysbench.log
+
+
+
 准备数据
 sysbench ./tests/include/oltp_legacy/oltp.lua --mysql-host=hwc1.kluster.xyz --mysql-port=3306 --mysql-user=root --mysql-password=*****--mysql-db=sbtest --oltp-test-mode=complex --oltp-tables-count=10 --oltp-table-size=100000 --threads=10 --time=120 --report-interval=10 prepare
 
