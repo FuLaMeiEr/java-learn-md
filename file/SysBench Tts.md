@@ -16,12 +16,47 @@
 
 
 - 准备数据
-sysbench ./tests/include/oltp_legacy/oltp.lua --mysql-host=hwc1.kluster.xyz --mysql-port=3306 --mysql-user=root --mysql-password=*****--mysql-db=sbtest --oltp-test-mode=complex --oltp-tables-count=10 --oltp-table-size=100000 --threads=10 --time=120 --report-interval=10 prepare
+```
+sysbench ./tests/include/oltp_legacy/oltp.lua \
+ --mysql-host=hwc1.kluster.xyz \
+ --mysql-port=3306 \
+ --mysql-user=root \
+ --mysql-password=***** \
+ --mysql-db=sbtest \
+ --oltp-test-mode=complex \
+ --oltp-tables-count=10 \
+ --oltp-table-size=100000 
+ --threads=10 \
+ --time=120 \
+ --report-interval=10 prepare
+```
+
 
 - 开始测试并输出日志
-sysbench ./tests/include/oltp_legacy/oltp.lua --mysql-host=hwc1.kluster.xyz --mysql-port=3306 --mysql-user=root --mysql-password=******--mysql-db=sbtest --oltp-test-mode=complex --oltp-tables-count=10 --oltp-table-size=100000 --threads=10 --time=120 --report-interval=10 run >> /usr/local/sysbeanch/sysbench-1.0.19/mytest/mysysbench.log
-
+```
+sysbench ./tests/include/oltp_legacy/oltp.lua \
+--mysql-host=hwc1.kluster.xyz \
+--mysql-port=3306 \
+--mysql-user=root \
+--mysql-password=******\
+--mysql-db=sbtest \
+--oltp-test-mode=complex \
+--oltp-tables-count=10 \
+--oltp-table-size=100000 \
+--threads=10 \
+--time=120 \
+--report-interval=10 run >> /usr/local/sysbeanch/sysbench-1.0.19/mytest/mysysbench.log
+```
 
 - 清除数据
-sysbench ./tests/include/oltp_legacy/oltp.lua --mysql-host=hwc1.kluster.xyz --mysql-port=3306 --mysql-user=root --mysql-password=****** --mysql-db=sbtest -oltp-tables-count=9 cleanup
+```
+sysbench ./tests/include/oltp_legacy/oltp.lua \
+--mysql-host=hwc1.kluster.xyz \
+--mysql-port=3306 \
+--mysql-user=root \
+--mysql-password=****** \
+--mysql-db=sbtest \
+-oltp-tables-count=9 cleanup
+```
+
 
