@@ -59,4 +59,6 @@ sysbench ./tests/include/oltp_legacy/oltp.lua \
 -oltp-tables-count=9 cleanup
 ```
 
+4. 测试报告
+![add image](https://github.com/FuLaMeiEr/java-learn-md/blob/master/report/picture/Test1111.png)
 
