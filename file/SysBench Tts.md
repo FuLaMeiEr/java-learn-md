@@ -71,7 +71,6 @@ sysbench ./tests/include/oltp_legacy/oltp.lua \
 -oltp-tables-count=9 cleanup
 ```
 
-<<<<<<< HEAD
 4. 压测报告
 
 | 线程数 | 请求数 | 数据量(w) | qps(r/s) | tps(r/s) | 95%(ms) | min | avg | max | totaltime(s) |  |
@@ -99,24 +98,4 @@ sysbench ./tests/include/oltp_legacy/oltp.lua \
 
 ### 性能测试
 ### 测试结论及优化建议
-=======
-4. 测试报告
 
-![add image](https://raw.githubusercontent.com/FuLaMeiEr/java-learn-md/master/report/picture/Test1111.png)
-
-queries: 查询总数及qps
-
-transactions: 事务总数及tps
-
-
-5. TPS QPS
-
- - TPS：Transactions Per Second，意思是每秒事务数，一个事务是指一个客户机向服务器发送请求然后服务器做出反应的过程。客户机在发送请求时开始计时，收到服务器响应后结束计时，以此来计算使用的时间和完成的事务个数。
- 每个事务包括了如下3个过程：
-　　a. 用户请求服务器
-　　b. 服务器自己的内部处理（包含应用服务器、数据库服务器等）
-　　c. 服务器返回给用户
-如果每秒能够完成N次这三个过程，tps就是N；有时，可能会将多个请求定义为一个事务，那么，完成一次这几个请求，就算一个tps。
- - QPS:  Queries Per Second，意思是每秒查询率，是一台服务器每秒能够响应的查询次数，是对一个特定的查询服务器（比如是读写分离的架构，就是读的服务器）在规定时间内所处理流量多少的衡量标准。
-
->>>>>>> 98f6f985605a6688c21477aafcdffd986863362e
