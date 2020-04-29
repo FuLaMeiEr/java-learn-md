@@ -95,7 +95,188 @@ sysbench ./tests/include/oltp_legacy/oltp.lua \
 
 结论： 200w数据 50个线程每秒查询数(qps)达到最大值
 
+### linux查看数据库指标
+1. 连接远程数据库 ./mysql -h hwc1.kluster.xyz -P 3306 -u root -p
+2. 查看所有库 show databeses
+3. 使用某一库 user  sbtest (sbtest)库名
+4. 显示当前数据库使用引擎 show variables like ‘%storage_engine%’;
+5. 查看数据库最大连接数 show global status like ‘max_used_connections’;
+6. 我们设置的最大连接数 show variables like ‘max_connections%’
+
+
+
+
+
 
 ### 性能测试
-### 测试结论及优化建议
+1. 最大连接数
 
+mysql> show global status like 'Max_used_connections';
++----------------------+-------+
+| Variable_name        | Value |
++----------------------+-------+
+| Max_used_connections | 152   |
++----------------------+-------+
+1 row in set (0.06 sec)
+
+mysql> show variables like 'max_connections%';
++-----------------+-------+
+| Variable_name   | Value |
++-----------------+-------+
+| max_connections | 151   |
++-----------------+-------+
+1 row in set (0.05 sec)
+
+通常max_connections的大小应该设置为比Max_used_connections状态值大，Max_used_connections状态值反映服务器连接在某个时间段是否有尖峰，如果该值大于max_connections值，代表客户端至少被拒绝了一次，可以简单地设置为符合以下条件：Max_used_connections/max_connections=0.8
+2. 线程连接数命中数
+
+mysql> show global status like 'threads_%';
++-------------------+-------+
+| Variable_name     | Value |
++-------------------+-------+
+| Threads_cached    | 5     |    //代表当前此时此刻线程缓存中有多少空闲线程
+| Threads_connected | 6     |  //代表当前已建立连接的数量，因为一个连接就需要一个线程，所以也可以看成当前被使用的线程数
+| Threads_created   | 2538  |  //代表从最近一次服务启动，已创建线程的数量
+| Threads_running   | 1     |  //代表当前激活的（非睡眠状态）线程数
++-------------------+-------+
+4 rows in set (0.15 sec)
+
+mysql> show global status like 'connections';
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| Connections   | 6908  |
++---------------+-------+
+1 row in set (0.04 sec)
+
+线程缓存命中率=1-Threads_created/Connections   = 36.7%
+
+我们设置的线程缓存个数
+mysql> show variables like '%thread_cache_size%';
++-------------------+-------+
+| Variable_name     | Value |
++-------------------+-------+
+| thread_cache_size | 9     |
++-------------------+-------+
+1 row in set (0.04 sec)
+
+根据Threads_connected可预估thread_cache_size值应该设置多大，一般来说250是一个不错的上限值，如果内存足够大，也可以设置成thread_cache_size值和threaads_connected值相同；
+
+或者通过观察threads_created值，如果该值很大或一直在增长，可以适当增加thread_cache_size的值；在休眠状态下每个线程大概占用256KB左右的内存，所以当内存足够时，设置太小也不会节约太多内存，除非该值已经超过几千。
+
+3. 缓存命中率
+
+mysql> show global status like 'innodb_buffer_pool_read%';
++---------------------------------------+----------+
+| Variable_name                         | Value    |
++---------------------------------------+----------+
+| Innodb_buffer_pool_read_ahead_rnd     | 0        |
+| Innodb_buffer_pool_read_ahead         | 42       |    //预读的页数
+| Innodb_buffer_pool_read_ahead_evicted | 0        |
+| Innodb_buffer_pool_read_requests      | 30626411 |   //从缓冲池中读取的次数
+| Innodb_buffer_pool_reads              | 21520    |  //表示从物理磁盘读取的页数
++---------------------------------------+----------+
+缓冲池命中率 = (Innodb_buffer_pool_read_requests)/(Innodb_buffer_pool_read_requests + Innodb_buffer_pool_read_ahead + Innodb_buffer_pool_reads)=99.92%
+
+如果该值小于99.9%，建议就应该增大innodb_buffer_pool_size的值了，该值一般设置为内存总大小的75%-85%，或者计算出操作系统所需缓存+mysql每个连接所需的内存（例如排序缓冲和临时表）+MyISAM键缓存，剩下的内存都给innodb_buffer_pool_size，不过也不宜设置太大，会造成内存的频繁交换，预热和关闭时间长等问题。
+
+4. 临时表使用情况
+
+mysql> show global status like 'created_tmp%';
++-------------------------+-------+
+| Variable_name           | Value |
++-------------------------+-------+
+| Created_tmp_disk_tables | 212   |
+| Created_tmp_files       | 37    |
+| Created_tmp_tables      | 43414 |
++-------------------------+-------+
+3 rows in set (0.04 sec)
+
+mysql> show variables like '%tmp_table_size%';
++----------------+----------+
+| Variable_name  | Value    |
++----------------+----------+
+| tmp_table_size | 16777216 |
++----------------+----------+
+1 row in set (0.04 sec)
+
+可看到总共创建了43414 张临时表，其中有212张涉及到了磁盘IO，大概比例占到了0.004，证明数据库应用中排序，join语句涉及的数据量太大，需要优化SQL或者增大tmp_table_size的值，该比值应该控制在0.2以内。
+
+5. binlog_cache使用
+mysql> show status like 'binlog_cache%';
++-----------------------+-------+
+| Variable_name         | Value |
++-----------------------+-------+
+| Binlog_cache_disk_use | 2230  |
+| Binlog_cache_use      | 44237 |
++-----------------------+-------+
+2 rows in set (0.04 sec)
+
+mysql> show variables like 'binlog_cache_size';
++-------------------+-------+
+| Variable_name     | Value |
++-------------------+-------+
+| binlog_cache_size | 32768 |
++-------------------+-------+
+1 row in set (0.13 sec)
+
+Binlog_cache_disk_use表示因为我们binlog_cache_size设计的内存不足导致缓存二进制日志用到了临时文件的次数
+Binlog_cache_use  表示 用binlog_cache_size缓存的次数
+当对应的Binlog_cache_disk_use 值比较大的时候 我们可以考虑适当的调高 binlog_cache_size 对应的值
+
+6. Innodb log buffer size的大小设置
+
+mysql> show variables like '%innodb_log_buffer_size%';
++------------------------+----------+
+| Variable_name          | Value    |
++------------------------+----------+
+| innodb_log_buffer_size | 16777216 |
++------------------------+----------+
+1 row in set (0.05 sec)
+
+mysql> show status like 'innodb_log_waits';
++------------------+-------+
+| Variable_name    | Value |
++------------------+-------+
+| Innodb_log_waits | 0     |
++------------------+-------+
+1 row in set (0.04 sec)
+
+innodb_log_buffer_size设置了16M；Innodb_log_waits表示因log buffer不足导致等待的次数，如果该值不为0，可以适当增大innodb_log_buffer_size的值。
+
+7. Innodb_buffer_pool_wait_free
+
+mysql> show global status like 'Innodb_buffer_pool_wait_free';
++------------------------------+-------+
+| Variable_name                | Value |
++------------------------------+-------+
+| Innodb_buffer_pool_wait_free | 0     |
++------------------------------+-------+
+1 row in set (0.04 sec)
+
+该值不为0表示buffer pool没有空闲的空间了，可能原因是innodb_buffer_pool_size设置太大，可以适当减少该值。
+
+8. 慢查询
+
+mysql> show global status like 'Slow_queries';
++---------------+-------+
+| Variable_name | Value |
++---------------+-------+
+| Slow_queries  | 0     |
++---------------+-------+
+1 row in set (0.06 sec)
+
+该值表示mysql启动以来的慢查询个数，即执行时间超过long_query_time的次数，可根据Slow_queries/uptime的比值判断单位时间内的慢查询个数，进而判断系统的性能。
+
+9. 表锁信息
+
+mysql>  show global  status like 'table_lock%';
++-----------------------+-------+
+| Variable_name         | Value |
++-----------------------+-------+
+| Table_locks_immediate | 1627  |
+| Table_locks_waited    | 0     |
++-----------------------+-------+
+2 rows in set (0.05 sec)
+
+这两个值的比值：Table_locks_waited /Table_locks_immediate 趋向于0，如果值比较大则表示系统的锁阻塞情况比较严重
