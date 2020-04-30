@@ -33,7 +33,8 @@ HashMap可以通过Map m = Collections.synchronizedMap(new HashMap())来达到�
 
 2. hashMap存取实现
 
-![图片先欠着](9df9d6d1a44e4ae992c989a2706efacb\wps1.jpeg)
+![hashMap存取实现](https://raw.githubusercontent.com/FuLaMeiEr/java-learn-md/master/report/picture/wps1.jpeg
+)
 
 
 #### ConcurrentHashMap:
@@ -73,4 +74,5 @@ Hi=RHi（key）,i=1，2，…，k
 
 4. hashMap与hashSet的比较
 
-![图先欠着]()
+![hashMap与hashSet的比较](https://raw.githubusercontent.com/FuLaMeiEr/java-learn-md/master/report/picture/wps2.jpeg
+)
