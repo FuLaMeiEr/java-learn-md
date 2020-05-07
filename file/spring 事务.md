@@ -34,3 +34,8 @@ PROPAGATION_XXX：事务的传播行为
  5. PROPAGATION_NOT_SUUORTED 总是非事务执行，并挂起任何存在事务
  6. PROPAGATION_NEVER 总是非事务的执行，如果存在一个活动事务，则抛出异常
  7. PROPAGATION_NESTED 如果一个活动事务的存在，则运行在另一个嵌套的事务中，如果没有活动事务,则按默认的传播机制执行
+
+
+
+### spring事务的配置方式
+
