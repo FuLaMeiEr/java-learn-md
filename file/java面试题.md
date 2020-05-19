@@ -166,3 +166,85 @@ print:
    
 #### 24.重入锁RenntrantLock 
 
+1. 支持重进入的锁，它表示该锁能够支持一个线程对资源的重复加锁。除此之外，该锁的还支持获取锁时的公平和非公平性选择。
+
+2. 重进入是指任意线程在获取到锁之后能够再次获锁而不被锁阻塞。
+该特性主要解决以下两个问题：
+ - 锁需要去识别获取锁的线程是否为当前占据锁的线程，如果是则再次成功获取。
+ - 所得最终释放。线程重复n次是获取了锁，随后在第n次释放该锁后，其他线程能够获取到该锁。
+
+3. RenntrantLock 默认为非公平锁
+4. 公平性与否针对获取锁来说的，如果一个锁是公平的，那么锁的获取顺序就应该符合请求的绝对时间顺序，也就是FIFO。
+
+#### 25. 读写锁
+读写锁允许同一时刻多个线程访问，但是写线程和其他写线程均被阻塞。读写锁维护一个读锁一个写锁，读写分离，并发性能得到提高
+java提供实现读写锁的实现类是ReentrantReadWriteLock.
+
+#### 26.Java并发容器
+1. concurrenthashmap, copyonwritearraylist, CopyOnWriteArraySet, ConcurrentLinkedQueue
+2. ConcurrentSkipListMap、ConcurrentSkipListSet、ArrayBlockingQueue、
+3. LinkedBlockingQueue、LinkedBlockingDeque、PriorityBlockingQueue、SynchronousQueue、LinkedTransferQueue、DelayQueue
+
+#### 27. 什么是阻塞队列
+- 阻塞队列是一个支持两个附加操作的队列,这两个附加操作支持阻塞的插入和移除方法
+ 1. 支持阻塞的插入方法：当队列满时，队列会阻塞插入元素的线程，直到队列不满。
+ 2. 支持阻塞的一处方法：当队列为空时，获取元素的线程会等待队列变为非空
+- 阻塞队列的常用应用场景 ：
+常用于生产者和消费者模式中，生产者是往队列中添加元素的线程，消费者是从队列中提取元素的线程。阻塞队列正好是生产者存放，消费者来获取的容器
+- java里的阻塞队列
+ArrayBlockingQueue： 数组结构组成的 |有界阻塞队列 
+LinkedBlockingQueue： 链表结构组成的|有界阻塞队列 
+PriorityBlockingQueue: 支持优先级排序|无界阻塞队列 
+DelayQueue： 优先级队列实现|无界阻塞队列 
+SynchronousQueue： 不存储元素| 阻塞队列 
+LinkedTransferQueue： 链表结构组成|无界阻塞队列 
+LinkedBlockingDeque： 链表结构组成|双向阻塞队列
+
+#### 28. 为什么使用线程池
+1. 降低系统消耗: 重复利用已经创建的线程降低线程创建和销毁造成的资源损耗
+2. 提高响应速度：当任务到达时，任务不需要等待线程的创建就可以立即执行
+3. 提供线程的可管理性：可以通过设置合理分配、调优、监控
+
+#### 29. 线程池的工作流程
+1. 判断核心线程池的线程是否都在执行任务，否--->创建一个新的线程来执行任务。是--->走下个流程
+2. 判断工作队列是否已满: 否--->新任务储存到这个工作队列中， 是---> 走下个流程
+3. 判断线程池里的线程是否都在工作状态: 否--->创建一个新的线程来执行任务。是--->走下个流程
+4. 按照设置的策略来处理无法执行的任务
+
+#### 30. 创建线程池参数有哪些
+
+```
+public ThreadPoolExecutor( int corePoolSize, 
+                           int maximumPoolSize, 
+                           long keepAliveTime, TimeUnit unit,
+                           BlockingQueue<Runnable> workQueue, 
+                           ThreadFactory threadFactory, 
+                           RejectedExecutionHandler handler)
+
+```
+
+1. corePoolSize:核心线程池大小，当提交一个任务时，线程池会创建一个线程来执行任务，即使其他空闲的核心线程能够执行新任务也会创建，等待需要执行的任务数大于线程核心大小就不会继续创建。
+
+2. maximumPoolSize:线程池最大数，允许创建的最大线程数，如果队列满了，并且已经创建的线程数小于最大线程数，则会创建新的线程执行任务。如果是无界队列，这个参数基本没用。
+
+3. keepAliveTime: 线程保持活动时间，线程池工作线程空闲后，保持存活的时间，所以如果任务很多，并且每个任务执行时间较短，可以调大时间，提高线程利用率。
+
+4. unit: 线程保持活动时间单位，天（DAYS)、小时(HOURS)、分钟(MINUTES、毫秒MILLISECONDS)、微秒(MICROSECONDS)、纳秒(NANOSECONDS)
+
+5. workQueue: 任务队列，保存等待执行的任务的阻塞队列。
+一般来说可以选择如下阻塞队列：
+ArrayBlockingQueue:基于数组的有界阻塞队列。
+LinkedBlockingQueue:基于链表的阻塞队列。
+SynchronizedQueue:一个不存储元素的阻塞队列。
+PriorityBlockingQueue:一个具有优先级的阻塞队列。
+
+6. threadFactory：设置创建线程的工厂，可以通过线程工厂给每个创建出来的线程设置更有意义的名字。
+
+7. handler: 饱和策略也叫拒绝策略。当队列和线程池都满了，即达到饱和状态。所以需要采取策略来处理新的任务。默认策略是AbortPolicy。
+ AbortPolicy:直接抛出异常。
+CallerRunsPolicy: 调用者所在的线程来运行任务。
+DiscardOldestPolicy:丢弃队列里最近的一个任务，并执行当前任务。
+DiscardPolicy:不处理，直接丢掉。
+当然可以根据自己的应用场景，实现RejectedExecutionHandler接口自定义策略。
+
+
