@@ -1,3 +1,4 @@
+
 # java面试题
 
 ### 线程相关
@@ -247,4 +248,123 @@ DiscardOldestPolicy:丢弃队列里最近的一个任务，并执行当前任务
 DiscardPolicy:不处理，直接丢掉。
 当然可以根据自己的应用场景，实现RejectedExecutionHandler接口自定义策略。
 
+#### 31.线程池提交的方式
+excute(),  submit()
+excute(): 无返回值，所以无法判断任务是否成功
+submit()：用于提交需要有返回值的任务，线程池返回一个future类型对象，通过future对象可以判断任务是否执行成功，并且通过future的get()来获取返回值，get()方法会阻塞当前线程知道任务完成。get(long timeout,TimeUnit unit)可以设置超市时间。
+
+#### 32. 线程池关闭方式
+可以通过shutdown(0或shutdownnow()来关闭线程池。他们的工作原理是通过遍历线程池的工作线程，然后逐个调用线程的interrupt来中断线程，所以无法响应终端的任务可能永远停止。
+shutdownnow首先将线程池状态设置为stop，然后尝试停止所有正在执行或者暂停的线程，并返回等待执行的列表
+shutdown只是将线程池的状态设置为shutdown状态，然后终端所有没有正在执行任务的线程。
+
+只要调用两者之一，isShutdown就会返回true,当所有任务都已关闭，isTerminaed就会返回true。
+
+一般来说调用shutdown方法来关闭线程池，如果任务不一定要执行完，可以直接调用shutdownNow方法。
+
+
+#### 33. Excutor
+1. 从JDK1.5开始，把工作单元和执行机制分开。工作单元包括Runable和callable，而执行机制有Executor框架提供。
+2. executor框架的主要成员
+ - ThreadPoolExecutor :可以通过工厂类Executors来创建。
+ - 可以创建3种类型的ThreadPoolExecutor：SingleThreadExecutor、FixedThreadPool、CachedThreadPool。
+- ScheduledThreadPoolExecutor ：可以通过工厂类Executors来创建。
+
+- 可以创建2中类型的ScheduledThreadPoolExecutor：ScheduledThreadPoolExecutor、SingleThreadScheduledExecutor
+
+- Future接口:Future和实现Future接口的FutureTask类来表示异步计算的结果。
+
+- Runnable和Callable:它们的接口实现类都可以被ThreadPoolExecutor或ScheduledThreadPoolExecutor执行。Runnable不能返回结果，Callable可以返回结果。
+
+
+### java基础
+
+#### 1. JDK 和 JRE 有什么区别
+- JDK：Java Development Kit 的简称，java 开发工具包，提供了 java 的开发环境和运行环境。
+- JRE：Java Runtime Environment 的简称，java 运行环境，为 java 的运行提供了所需环境。
+
+具体来说 JDK 其实包含了 JRE，同时还包含了编译 java 源码的编译器 javac，还包含了很多 java 程序调试和分析的工具。简单来说：如果你需要运行 java 程序，只需安装 JRE 就可以了，如果你需要编写 java 程序，需要安装 JDK。
+
+#### 2. == 和equals
+1. == 对于基本类型来说是值比较，对于引用类型来说是比较的是引用；
+2. equals 默认情况下是引用比较，只是很多类重新了 equals 方法，比如 String、Integer 等把它变成了值比较，所以一般情况下 equals 比较的是值是否相等。
+
+#### 3. 两个对象的hashcode值相同，则equals的一定为true 对吗？
+不对，，因为在散列表中，hashCode()相等即两个键值对的哈希值相等，然而哈希值相等，并不一定能得出键值对相等。
+
+4. final 在 java 中有什么作用？
+
+*   final 修饰的类叫最终类，该类不能被继承。
+*   final 修饰的方法不能被重写。
+*   final 修饰的变量叫常量，常量必须初始化，初始化之后值就不能被修改。
+
+5.  java 中的 Math.round(-1.5) 等于多少
+等于 -1，因为在数轴上取值时，中间值（0.5）向右取整，所以正 0.5 是往上取整，负 0.5 是直接舍弃。
+
+6. String 属于基础的数据类型吗？
+String 不属于基础类型，基础类型有 8 种：byte、boolean、char、short、int、float、long、double，而 String 属于对象。
+
+7. java 中操作字符串都有哪些类？它们之间有什么区别？
+- 操作字符串的类有：String、StringBuffer、StringBuilder。
+- String 和 StringBuffer、StringBuilder 的区别在于 String 声明的是不可变的对象，每次操作都会生成新的 String 对象，然后将指针指向新的 String 对象，而 StringBuffer、StringBuilder 可以在原有对象的基础上进行操作，所以在经常改变字符串内容的情况下最好不要使用 String。
+- StringBuffer 和 StringBuilder 最大的区别在于，StringBuffer 是线程安全的，而 StringBuilder 是非线程安全的，但 StringBuilder 的性能却高于 StringBuffer，所以在单线程环境下推荐使用 StringBuilder，多线程环境下推荐使用 StringBuffer。
+
+8. String str="i"与 String str=new String("i")一样吗？
+不一样，因为内存的分配方式不一样。String str="i"的方式，java 虚拟机会将其分配到常量池中；而 String str=new String("i") 则会被分到堆内存中。
+
+9. 如何将字符串反转
+使用stringbuilder 或者stringbuffer的reverse()方法
+
+10. string类的常用方法
+-   indexOf()：返回指定字符的索引。
+-   charAt()：返回指定索引处的字符。
+-   replace()：字符串替换。
+-   trim()：去除字符串两端空白。
+-   split()：分割字符串，返回一个分割后的字符串数组。
+-   getBytes()：返回字符串的 byte 类型数组。
+-   length()：返回字符串长度。
+-   toLowerCase()：将字符串转成小写字母。
+-   toUpperCase()：将字符串转成大写字符。
+-   substring()：截取字符串。
+-   equals()：字符串比较。
+
+11. 抽象类必须要有抽象方法吗？
+不需要
+
+12. 普通类和抽象类的区别
+- 普通类不能包含抽象方法
+- 抽象类不能实例化
+
+13. 抽象类可以用final修饰吗？
+不能，抽象类本来就是用来被继承的
+
+14. 接口和抽象类有什么区别
+- 抽象类的子类用extend来继承， 接口必须用implements来实现接口
+- 抽象类可以有构造函数， 接口不可以
+- main 抽象类可以有main方法， 接口不可以
+- 类可以实现多个接口，但只能继承一个抽象类 
+- 接口的方法默认使用public, 抽象类可以使用任意修饰符
+
+15. java中流分几种
+- 按功能分 ： 输入流、 输出流
+- 按类型分： 字节流、 字符流
+字节流和字符流的区别： 字节流按8位为传输单位输入输出数据，字符流按16位为输出输入单位
+
+16. BIO NIO AIO 的区别
+- BIO：Block IO 同步阻塞式 IO，就是我们平常使用的传统 IO，它的特点是模式简单使用方便，并发处理能力低。
+- NIO：New IO 同步非阻塞 IO，是传统 IO 的升级，客户端和服务器端通过 Channel（通道）通讯，实现了多路复用。
+- AIO：Asynchronous IO 是 NIO 的升级，也叫 NIO2，实现了异步非堵塞 IO ，异步 IO 的操作基于事件和回调机制。
+
+17. file的常用方法
+-   Files.exists()：检测文件路径是否存在。
+-   Files.createFile()：创建文件。
+-   Files.createDirectory()：创建文件夹。
+-   Files.delete()：删除一个文件或目录。
+-   Files.copy()：复制文件。
+-   Files.move()：移动文件。
+-   Files.size()：查看文件个数。
+-   Files.read()：读取文件。
+-   Files.write()：写入文件。
+
+18. java 的容器有哪些
 
