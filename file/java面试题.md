@@ -563,4 +563,234 @@ HTTP头中的Referer字段记录了该 HTTP 请求的来源地址。在通常情
     4. 在HTTP 头中自定义属性并验证
 这种方法也是使用 token 并进行验证，和上一种方法不同的是，这里并不是把 token 以参数的形式置于 HTTP 请求之中，而是把它放到 HTTP 头中自定义的属性里。通过 XMLHttpRequest 这个类，可以一次性给所有该类请求加上 csrftoken 这个 HTTP 头属性，并把 token 值放入其中。这样解决了上种方法在请求中加入 token 的不便，同时，通过 XMLHttpRequest 请求的地址不会被记录到浏览器的地址栏，也不用担心 token 会透过 Referer 泄露到其他网站中去。
 
+### 异常
+72. throw和throws的区别
+throws是用来声明一个方法可能抛出的所有异常信息，throw只将异常声明但是不处理，而是将异常往上传，谁调用我就交给谁处理。而throw是具体抛出一个异常类型
+
+73. final、finally、finalize有什么区别
+- final可以修饰类、方法、变量。修饰类表示该类不能被继承、修饰方法表示该方法不能被重写、修饰变量表示该变量不能重新赋值
+- finally 一般在try-catch代码块中，在处理异常的时候，通常我们一定要执行的代码方法finally代码块中，表示不管是否出现异常,该代码都会被执行。一般用来关闭资源的代码
+- finalize是一个方法、属于Object类，该方法一般有垃圾回收机制调用，当我们调用System的gc()方法的时候，由垃圾回收器调用finalize(),回收垃圾
+
+74. 常见异常类有哪些
+  - NullPointerException: 空异常    当程序视图访问空对象时，抛出该异常
+  - SQLException: Sql异常     提供关于数据库访问错误或其他错误信息的异常。
+  - IndexOutOfBoundsException：数组下标越界异常 指示某排序索引（例如对数组、字符串或向量的排序）超出范围时抛出。
+  - NumberFormatException :  数字格式异常 当应用程序试图将字符串转换成一种数值类型，但该字符串不能转换为适当格式时，抛出该异常。
+  - FileNotFoundException: 文件找不到异常  当试图打开指定路径名表示的文件失败时，抛出此异常。
+  - IOException：io异常 当发生某种I/O异常时，抛出此异常。此类是失败或中断的I/O操作生成的异常的通用类。
+  - ClassCastException:  类型转换异常 当试图将对象强制转换为不是实例的子类时，抛出该异常。
+  - ArrayStoreException:                  试图将错误类型的对象存储到一个对象数组时抛出的异常。
+  - IllegalArgumentException 不合法参数异常 抛出的异常表明向方法传递了一个不合法或不正确的参数。
+  - ArithmeticException：算术运算异常 当出现异常的运算条件时，抛出此异常。例如，一个整数“除以零”时，抛出此类的一个实例。
+  - NegativeArraySizeException 如果应用程序试图创建大小为负的数组，则抛出该异常。
+  - NoSuchMethodException：无法找到某一特定方法时，抛出该异常。
+  - SecurityException：由安全管理器抛出的异常，指示存在安全侵犯。
+  - UnsupportedOperationException：当不支持请求的操作时，抛出该异常。
+  - RuntimeExceptionRuntimeException： 是那些可能在Java虚拟机正常运行期间抛出的异常的超类。
+
+
+### 设计模式
+
+75. 常用的设计模式
+- 单利模式  就是一个应用程序中，某个类的实例对象只有一个，你没有办法去new，因为构造器是被private修饰的，一般通过getInstance()的方法来获取它们的实例。
+  1.  懒汉式写法
+```
+   private static Singleton instance;  
+     private Singleton (){}  
+     public static synchronized Singleton getInstance() {  
+     if (instance == null) {  
+         instance = new Singleton();  
+     }  
+     return instance;  
+     }
+```
+  2. 饿汉式
+      
+```
+
+  public class Singleton{
+     private static Singleton instance;
+     private Singleton(){}
+     public Singleton getInstance();
+     return instance;
+  }
+```
+   3. 静态内部类
+
+```
+  public class Singleton{
+    private static class SingletonHolder{
+      private static final Singleton INSTANCE = new Singleton(); 
+    }
+
+    private Singleton(){}
+    public static final Singleton getInstance(){
+      return SingletonHolder.getInstance();
+    }
+  }
+
+```
+
+    4. 枚举
+    
+```
+  public enum Singleton{
+    INSTANCE;
+    public void whateverMethod{
+    }
+  
+  }
+
+```
+
+- 工厂模式 
+  1. 简单工厂模式：一个抽象的接口，多个抽象接口的实现类，一个工厂类，用来实例化抽象的接口
+```
+  abstract class Car{
+    public void run();
+
+    public void stop();
+  
+  }
+
+  class Benz implements Car {
+   public void run() {
+       System.out.println("Benz开始启动了。。。。。");
+   }
+
+   public void stop() {
+       System.out.println("Benz停车了。。。。。");
+   }
+}
+
+class Ford implements Car {
+   public void run() {
+       System.out.println("Ford开始启动了。。。");
+   }
+
+   public void stop() {
+       System.out.println("Ford停车了。。。。");
+   }
+}
+
+  class Factory {
+   public static Car getCarInstance(String type) {
+       Car c = null;
+       if ("Benz".equals(type)) {
+           c = new Benz();
+       }
+       if ("Ford".equals(type)) {
+           c = new Ford();
+       }
+       return c;
+   }
+}
+
+public class Test {
+
+   public static void main(String[] args) {
+       Car c = Factory.getCarInstance("Benz");
+       if (c != null) {
+           c.run();
+           c.stop();
+       } else {
+           System.out.println("造不了这种汽车。。。");
+       }
+
+   }
+```
+
+   2. 工厂方法模式：有四个角色，抽象工厂模式，具体工厂模式，抽象产品模式，具体产品模式。不再是由一个工厂类去实例化具体的产品，而是由抽象工厂的子类去实例化产品
+```
+  public interface Moveable {
+     void run();
+  }
+  
+  // 具体产品角色
+  public class Plane implements Moveable {
+     @Override
+     public void run() {
+         System.out.println("plane....");
+     }
+  }
+  
+  public class Broom implements Moveable {
+     @Override
+     public void run() {
+         System.out.println("broom.....");
+     }
+  }
+  
+  // 抽象工厂
+  public abstract class VehicleFactory {
+     abstract Moveable create();
+  }
+  
+  // 具体工厂
+  public class PlaneFactory extends VehicleFactory {
+     public Moveable create() {
+         return new Plane();
+     }
+  }
+  
+  public class BroomFactory extends VehicleFactory {
+     public Moveable create() {
+         return new Broom();
+     }
+  }
+  
+  // 测试类
+  public class Test {
+     public static void main(String[] args) {
+         VehicleFactory factory = new BroomFactory();
+         Moveable m = factory.create();
+         m.run();
+     }
+}
+
+
+
+```
+   3. 抽象工厂模式：与工厂方法模式不同的是，工厂方法模式中的工厂只生产单一的产品，而抽象工厂模式中的工厂生产多个产品
+
+```
+  public abstract class AbstractFactory{
+   public abstract Vehicle createVehicle();
+   public abstract Weapon createWeapon();
+   public abstract Food createFood();
+  }
+
+  public class DefaultFactory extends AbstractFactory{
+     @Override
+     public Food createFood() {
+         return new Apple();
+     }
+     @Override
+     public Vehicle createVehicle() {
+         return new Car();
+     }
+     @Override
+     public Weapon createWeapon() {
+         return new AK47();
+     }
+  }
+
+  public class Test {
+   public static void main(String[] args) {
+       AbstractFactory f = new DefaultFactory();
+       Vehicle v = f.createVehicle();
+       v.run();
+       Weapon w = f.createWeapon();
+       w.shoot();
+       Food a = f.createFood();
+       a.printName();
+   }
+  }
+```
+
+- 代理模式(proxy)
+代理模式给某一个对象提供一个代理对象，并由代理对象控制对原对象的引用。通俗的来讲代理模式就是我们生活中常见的中介。
+
+
 
